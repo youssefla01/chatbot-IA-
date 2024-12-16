@@ -2,6 +2,8 @@ import React from 'react';
 import { User, Bot } from 'lucide-react';
 import type { Message } from '../../types';
 import { cn } from '../../utils/cn';
+import { parseMessageContent } from '../../utils/message';
+import { CodeBlock } from './CodeBlock';
 
 interface ChatMessageProps {
   message: Message;
@@ -9,6 +11,7 @@ interface ChatMessageProps {
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   const isUser = message.role === 'user';
+  const contentParts = parseMessageContent(message.content);
 
   return (
     <div
@@ -36,8 +39,18 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
             {isUser ? 'Vous' : 'Assistant'}
           </p>
-          <div className="prose dark:prose-invert max-w-none text-sm sm:text-base">
-            {message.content}
+          <div className="prose dark:prose-invert max-w-none text-sm sm:text-base space-y-4">
+            {contentParts.map((part, index) => (
+              part.type === 'code' ? (
+                <CodeBlock
+                  key={index}
+                  code={part.content}
+                  language={part.language}
+                />
+              ) : (
+                <p key={index}>{part.content}</p>
+              )
+            ))}
           </div>
         </div>
       </div>
